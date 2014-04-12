@@ -3,7 +3,7 @@
 # must have rename (sudo apt-get install rename)
 
 # expedia languages
-declare -a expedia_languages=("en_US" "ar_SA" "da_DK" "de_DE" "el_GR" "fi_FI" "fr_FR" "hu_HU" "in_ID" "vg_VG" "ja_JP" "xb_XE" "ms_MY" "nl_NL" "no_NO" "pl_PL" "pt_BR" "ru_RU" "es_ES" "sv_SE" "th_TH" "tr_TR" "zh_TW" "zh_CN")
+declare -a expedia_languages=("en_US" "ar_SA" "da_DK" "de_DE" "el_GR" "fi_FI" "fr_FR" "hu_HU" "in_ID" "it_IT" "ja_JP" "ko_KR" "ms_MY" "nl_NL" "no_NO" "pl_PL" "pt_BR" "ru_RU" "es_ES" "sv_SE" "th_TH" "tr_TR" "zh_TW" "zh_CN")
 
 # download the entire files.
 echo "Starting to download files (this will take a while)"
@@ -12,15 +12,17 @@ declare -a fileNames=("ActivePropertyList" "PropertyTypeList" "PropertyDescripti
 for i in "${fileNames[@]}"
 do
     echo "Downloading $i"
-    for
+    declare f=""
+    for language in ${expedia_languages[@]}
     do
-        declare language=""
-        if [ "$line" != "en_US" ]
+        if [ "$language" != "en_US" ]
         then
-            language="_$line"
+            language="_$language"
+            f="$i$language.zip"
+        else
+            echo "English!"
+            f="$i.zip"
         fi
-
-        declare f="$i$language.zip"
 
         if [ -a "./$f" ]
         then
@@ -28,8 +30,8 @@ do
             continue
         fi
 
-        wget $url$f
-    done < "expedia_languages"
+        wget "$url$f"
+    done
 done
 echo "Downloading images file"
 if [ -a "./HotelImageList.zip" ]
