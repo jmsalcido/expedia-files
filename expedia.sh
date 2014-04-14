@@ -8,7 +8,7 @@ declare -a expedia_languages=("en_US" "ar_SA" "da_DK" "de_DE" "el_GR" "fi_FI" "f
 # download the entire files.
 echo "Starting to download files (this will take a while)"
 declare url="http://www.ian.com/affiliatecenter/include/V2/"
-declare -a fileNames=("ActivePropertyList" "PropertyTypeList" "PropertyDescriptionList" "PropertyAttributeLink" "AttributeList")
+declare -a fileNames=("ActivePropertyList" "PropertyTypeList" "PropertyDescriptionList" "PropertyAttributeLink" "AttributeList" "PolicyDescriptionList")
 for i in "${fileNames[@]}"
 do
     echo "Downloading $i"
@@ -91,11 +91,11 @@ do
         awk -v arr="${hotelcodes[*]}" -v found=0 -v allowedError=0 -F'|' 'BEGIN { OFS="|" split(arr, list, " ");} (NR==1){print} (NR>1){for(i=0;i<length(list);i+=1){if(allowedError>5000000 && found==1){ exit 1} if($1 == list[i]){{print; allowedError=0; found=1}}else{allowedError++;}}}' $f > ./final/$f
         continue
     fi
-    if [[ "$f" = "PropertyDescription"*"txt" ]]
+    if [[ "$f" = "PropertyDescription"*"txt" ]] || [[ "$f" = "PolicyDescriptionList"*"txt" ]]
     then
         awk -v arr="${hotelcodes[*]}" -v allowedError=0 -F'|' 'BEGIN { OFS="|" split(arr, list, " ");} (NR==1){print} (NR>1){for(i=0;i<length(list);i+=1){if(allowedError>1160905){ exit 1} if($1 == list[i]){{print; allowedError=0}}else{allowedError++;}}}' $f > ./final/$f
     else
-        awk -v arr="${hotelcodes[*]}" -v allowedError=0 -F'|' 'BEGIN { OFS="|" split(arr, list, " ");} (NR==1){print} (NR>1){for(i=0;i<length(list);i+=1){if(allowedError>10000) {exit 1}if($1 == list[i]) {{print; allowedError=0}}else{allowedError++}}}' $f > ./final/$f
+        awk -v arr="${hotelcodes[*]}" -v allowedError=0 -F'|' 'BEGIN { OFS="|" split(arr, list, " ");} (NR==1){print} (NR>1){for(i=0;i<length(list);i+=1){if($1 == list[i]) {{print}}}' $f > ./final/$f
     fi
     cd final
     # create the zip file (we will need this..)
