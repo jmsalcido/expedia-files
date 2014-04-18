@@ -52,13 +52,13 @@ echo "Downloaded expedia files"
 echo "Starting to unzip files"
 for f in ./*.zip
 do
-    unzip -d unzip $f
+    unzip -o -d unzip $f
 done
 cd unzip;
 
 # print the entire files pertaining an airport code.
 # $12 == AirportCode
-awk -v airportcode="SFO" -F'|' 'BEGIN { OFS="|" } ($12==airportcode && NR>1){print $1}' ActivePropertyList.txt > ./hotelids
+awk -F'|' 'BEGIN { OFS="|" } ($12=="SFO" && NR>1){print $1}' ActivePropertyList.txt > ./hotelids
 declare -a hotelcodes=()
 while read h;
     do
@@ -86,17 +86,23 @@ do
         cd ..
         continue;
     fi
-    if [[ "$f" = "PropertyAttributeLink"*"txt" ]] || [[ "$f" = "HotelImageList"*"txt" ]]
-    then
-        awk -v arr="${hotelcodes[*]}" -v found=0 -v allowedError=0 -F'|' 'BEGIN { OFS="|" split(arr, list, " ");} (NR==1){print} (NR>1){for(i=0;i<length(list);i+=1){if(allowedError>5000000 && found==1){ exit 1} if($1 == list[i]){{print; allowedError=0; found=1}}else{allowedError++;}}}' $f > ./final/$f
-        continue
-    fi
-    if [[ "$f" = "PropertyDescription"*"txt" ]] || [[ "$f" = "PolicyDescriptionList"*"txt" ]]
-    then
-        awk -v arr="${hotelcodes[*]}" -v allowedError=0 -F'|' 'BEGIN { OFS="|" split(arr, list, " ");} (NR==1){print} (NR>1){for(i=0;i<length(list);i+=1){if(allowedError>1160905){ exit 1} if($1 == list[i]){{print; allowedError=0}}else{allowedError++;}}}' $f > ./final/$f
-    else
-        awk -v arr="${hotelcodes[*]}" -v allowedError=0 -F'|' 'BEGIN { OFS="|" split(arr, list, " ");} (NR==1){print} (NR>1){for(i=0;i<length(list);i+=1){if($1 == list[i]) {{print}}}' $f > ./final/$f
-    fi
+    # if [[ "$f" = "PropertyAttributeLink"*"txt" ]] || [[ "$f" = "HotelImageList"*"txt" ]]
+    # then
+    #     # awk -v arr="${hotelcodes[*]}" -v found=0 -v allowedError=0 -F'|' 'BEGIN { OFS="|" split(arr, list, " ");} (NR==1){print} (NR>1){for(i=0;i<length(list);i+=1){if(allowedError>5000000 && found==1){ exit 1} if($1 == list[i]){{print; allowedError=0; found=1}}else{allowedError++;}}}' $f > ./final/$f
+    #     awk -F'|' 'BEGIN { OFS="|"} (NR==1){print} ' $f > ./final/$f
+    #     cd final
+    #     # create the zip file (we will need this..)
+    #     zip $f.zip $f
+    #     cd ..
+    #     continue
+    # fi
+    # if [[ "$f" = "PropertyDescription"*"txt" ]] || [[ "$f" = "PolicyDescriptionList"*"txt" ]]
+    # then
+    #     # awk -v arr="${hotelcodes[*]}" -v allowedError=0 -F'|' 'BEGIN { OFS="|" split(arr, list, " ");} (NR==1){print} (NR>1){for(i=0;i<length(list);i+=1){if(allowedError>1160905){ exit 1} if($1 == list[i]){{print; allowedError=0}}else{allowedError++;}}}' $f > ./final/$f
+    #     awk -F'|' 'BEGIN { OFS="|"} (NR==1){print} ' $f > ./final/$f
+    # else
+        awk -v arr="${hotelcodes[*]}" -v allowedError=0 -F'|' 'BEGIN { OFS="|" split(arr, list, " ");} (NR==1){print} (NR>1){for(i=0;i<length(list);i+=1){if($1 == list[i]) {{print}}}}' $f > ./final/$f
+    # fi
     cd final
     # create the zip file (we will need this..)
     zip $f.zip $f
@@ -108,6 +114,6 @@ cd final
 # must have rename (sudo apt-get install rename)
 echo 'rename -v "s/.txt.zip/.zip/##g" *zip'
 rename -v "s/.txt.zip/.zip/##g" *zip
-mv *zip /home/jsalcido/Dropbox/Public/Expedia/V2/
+# mv *zip /home/jsalcido/Dropbox/Public/Expedia/V2/
 
 # echo ${hotelcodes[@]};
